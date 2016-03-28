@@ -38,6 +38,10 @@ public class Server {
             Thread thread = new Thread(new Input(socket, out, in, name));
             thread.start();
             id++;
+            for (String $ : users.keySet()) {
+                DataOutputStream outstream = new DataOutputStream(users.get($).getOutputStream());
+                outstream.writeUTF("Welcome "+name+" to the chat!");
+            }
         }
     }
     public static void main(String[] args) throws Exception
@@ -78,6 +82,9 @@ public class Server {
                 catch(Exception exception)
                 {
                     System.out.println("didn't work");
+                    this.out = null;
+                    this.in = null;
+                    this.socket = null;
                     break;
                 }
             }
