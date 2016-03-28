@@ -15,10 +15,11 @@ public class Server {
     public DataOutputStream out;
     public DataInputStream in;
     public HashMap<String, Socket> users;
-
+    public int id;
 
     public Server() throws Exception
     {
+        id = 0;
         serversocket = new ServerSocket(7777);
         System.out.println("Starting server...");
         System.out.println("Waiting for players...");
@@ -31,11 +32,12 @@ public class Server {
             out = new DataOutputStream(socket.getOutputStream());
             in = new DataInputStream(socket.getInputStream());
             out.writeUTF("Hello!\nPlease enter an ingame-name: ");
-            String name = in.readUTF();
+            String name = in.readUTF()+"_"+id+"";
             users.put(name, socket);
             System.out.println("Added to list");
-            Thread thread = new Thread(new Input(socket, out, in));
+            Thread thread = new Thread(new Input(socket, out, in, name));
             thread.start();
+            id++;
         }
     }
     public static void main(String[] args) throws Exception
@@ -47,12 +49,14 @@ public class Server {
         public Socket socket;
         public DataOutputStream out;
         public DataInputStream in;
+        public String name;
 
-        public Input(Socket socket, DataOutputStream out, DataInputStream in)
+        public Input(Socket socket, DataOutputStream out, DataInputStream in, String name)
         {
             this.socket = socket;
             this.out = out;
             this.in = in;
+            this.name = name;
         }
         public void run()
         {
@@ -64,9 +68,9 @@ public class Server {
                     String printed = input.split("~")[1];
                     System.out.println(input);
                     for (String $ : users.keySet()) {
-                        if( !$.equals(this.socket) || true)
+                        if( !$.equals(this.name) )
                         {
-                            DataOutputStream outstream = new DataOutputStream($.replaceFirst($).getOutputStream());
+                            DataOutputStream outstream = new DataOutputStream(users.get($).getOutputStream());
                             outstream.writeUTF("[" + name + "]: " + printed);
                         }
                     }
@@ -74,6 +78,7 @@ public class Server {
                 catch(Exception exception)
                 {
                     System.out.println("didn't work");
+                    break;
                 }
             }
         }

@@ -67,7 +67,7 @@ public class Player {
             String output = "";
             while(true)
             {
-                System.out.print("Message: ");
+                //System.out.print("Message: ");
                 output = this.scanner.nextLine();
                 //System.out.println("output: "+output);
                 try {
@@ -111,6 +111,7 @@ public class Player {
                 catch(Exception exception)
                 {
                     System.out.println("Couldn't get input.");
+                    break;
                 }
             }
         }
