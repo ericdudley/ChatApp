@@ -46,20 +46,26 @@ public class Server {
             Thread thread = new Thread(new Input(socket, out, in, name));
             thread.start();
             id++;
+            String welcome_message = "Welcome "+name+" to the chat!";
+            messages.add(welcome_message);
             for (String $ : users.keySet()) {
-                DataOutputStream outstream = new DataOutputStream(users.get($).getOutputStream());
-                String welcome_message = "Welcome "+name+" to the chat!";
-                messages.add(welcome_message);
-                //outstream.writeUTF(welcome_message);
+                if( !$.equals(name) && !users.get($).equals(null) )
+                {
+                    DataOutputStream outstream = new DataOutputStream(users.get($).getOutputStream());
+                    outstream.writeUTF(welcome_message);
+                }
             }
             String total_str = "";
             for(int i=Math.max(0,messages.size()-21); i<messages.size(); i++)
             {
                 total_str += messages.get(i)+"\n";
             }
-            total_str.trim();
+            total_str = total_str.trim();
             //System.out.println(total_str);
-            out.writeUTF(total_str);
+            if(!total_str.equals(""))
+            {
+                out.writeUTF(total_str);
+            }
         }
     }
     public static void main(String[] args) throws Exception
@@ -88,10 +94,10 @@ public class Server {
                     String input = this.in.readUTF();
                     String name = input.split("~")[0];
                     String printed = input.split("~")[1];
-                    System.out.println(input);
+                    //System.out.println(input);
+                    String printstr = "["+ name + "]: "+printed;
+                    messages.add(printstr);
                     for (String $ : users.keySet()) {
-                        String printstr = "["+ name + "]: "+printed;
-                        messages.add(printstr);
                         if( !$.equals(this.name) && !users.get($).equals(null) )
                         {
                             DataOutputStream outstream = new DataOutputStream(users.get($).getOutputStream());
@@ -101,7 +107,9 @@ public class Server {
                 }
                 catch(Exception exception)
                 {
-                    System.out.println("didn't work for "+this.name);
+                    System.out.println(this.name+" disconnected.");
+                    Output output = new Output();
+                    output.sendServerMessage(this.name+" has disconnected");
                     this.out = null;
                     this.in = null;
                     this.socket = null;
@@ -117,11 +125,11 @@ public class Server {
         {
             try
             {
+                messages.add("[~Server~] \n\t" + message + "\n[~Server~]");
                 for (String $ : users.keySet())
                 {
-                    messages.add("[~Server~] \n\t" + message + "\n");
                     DataOutputStream outstream = new DataOutputStream(users.get($).getOutputStream());
-                    outstream.writeUTF("[~Server~] \n\t" + message + "\n");
+                    outstream.writeUTF("[~Server~] \n\t" + message + "\n[~Server~]");
                 }
             }
             catch(Exception exception)
@@ -201,13 +209,24 @@ public class Server {
                             sendServerMessage("1");
                             System.exit(0);
                             break;
-                        case "restart":
+                        case "reset":
                             sendServerMessage("Server is restarting...");
                             for(String $: users.keySet())
                             {
                                 kickPlayer($);
                             }
                             messages.clear();
+                            break;
+                        case "commands":
+                            System.out.println("sm %message - Send server message to all players.\n" +
+                                    "kp %name - Kick player from the server.\n" +
+                                    "TODO ban %name - Ban a players ip address from the server.\n" +
+                                    "TODO unban %name - Unban a players ip address from the server.\n" +
+                                    "pl - Get a list of all current players.\n" +
+                                    "wtp %name %message - Whisper a message to specified player.\n" +
+                                    "shutdown - Notify all players server is shutting down, then shutdown.\n" +
+                                    "reset - Kick all players and clear messages history.\n" +
+                                    "commands - Show all available commands.");
                             break;
                         default:
                             System.out.println("Unknown command.");
