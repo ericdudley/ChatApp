@@ -110,7 +110,7 @@ public class Player {
                 }
                 catch(Exception exception)
                 {
-                    System.out.println("Couldn't get input.");
+                    System.out.println("Disconnected from server.");
                     break;
                 }
             }
