@@ -49,16 +49,16 @@ public class Player {
     private class Output implements Runnable
     {
 
-        public Socket socket;
-        public DataOutputStream out;
-        public DataInputStream in;
+        //public Socket socket;
+        //public DataOutputStream out;
+        //public DataInputStream in;
         public Scanner scanner;
 
         public Output(Socket socket, DataOutputStream out, DataInputStream in, Scanner scanner)
         {
-            this.socket = socket;
-            this.out = out;
-            this.in = in;
+            //this.socket = socket;
+            //this.out = out;
+            //this.in = in;
             this.scanner = scanner;
         }
 
@@ -82,28 +82,36 @@ public class Player {
 
         private void outputMessage(String message) throws Exception
         {
-            this.out.writeUTF(name+"~"+message);
+            out.writeUTF(name+"~"+message);
         }
     }
 
     private class Input implements Runnable
     {
-        public Socket socket;
-        public DataOutputStream out;
-        public DataInputStream in;
+        //public Socket socket;
+        //public DataOutputStream out;
+        //public DataInputStream in;
 
         public Input(Socket socket, DataOutputStream out, DataInputStream in)
         {
-            this.socket = socket;
-            this.out = out;
-            this.in = in;
+            //this.socket = socket;
+            //this.out = out;
+            //this.in = in;
         }
         public void run()
         {
             while(true) {
                 try {
                     //System.out.println("Waiting for input...");
-                    String input = this.in.readUTF();
+                    String input = in.readUTF();
+                    if(input.equals("!kicked"))
+                    {
+                        socket = null;
+                        in = null;
+                        out = null;
+                        System.out.println("Disconnecting...");
+                        //System.exit(0);
+                    }
                     //String name = input.split("~")[0];
                     //String printed = input.split("~")[1];
                     System.out.println(input);

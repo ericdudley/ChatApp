@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Eric on 3/28/2016.
@@ -112,6 +113,54 @@ public class Server {
     }
     private class Output implements Runnable
     {
+        private void sendServerMessage(String message)
+        {
+            try
+            {
+                for (String $ : users.keySet())
+                {
+                    messages.add("[~Server~] \n\t" + message + "\n");
+                    DataOutputStream outstream = new DataOutputStream(users.get($).getOutputStream());
+                    outstream.writeUTF("[~Server~] \n\t" + message + "\n");
+                }
+            }
+            catch(Exception exception)
+            {
+                System.out.println("Failed to send server message.");
+            }
+        }
+
+        private void whisper(String user, String message)
+        {
+            try
+            {
+                DataOutputStream outstream2 = new DataOutputStream(users.get(user).getOutputStream());
+                outstream2.writeUTF("[~ServerWhisper~] \n\t" + message + "\n[~ServerWhisper~]");
+            }
+            catch(Exception exception)
+            {
+                System.out.println("Failed to send whisper.");
+            }
+        }
+
+        private void kickPlayer(String user)
+        {
+            try
+            {
+                if(users.containsKey(user))
+                {
+                    whisper(user, "You have been kicked.");
+                    DataOutputStream outstream = new DataOutputStream(users.get(user).getOutputStream());
+                    outstream.writeUTF("!kicked");
+                    users.remove(user);
+                    sendServerMessage(user+" has been kicked.");                
+                }
+            }
+            catch(Exception expection)
+            {
+                System.out.println("Failed to kick player.");
+            }
+        }
         public void run()
         {
             Scanner sc = new Scanner(System.in);
@@ -123,19 +172,15 @@ public class Server {
                     String cmd = output.split(" ")[0];
                     String[] components = output.split(" ");
                     String body = "";
-                    String outputstr = "";
                     for (int i = 1; i < output.split(" ").length; i++) {
                         body += output.split(" ")[i]+" ";
                     }
                     switch (cmd) {
                         case "sm":
-                            outputstr = body;
+                            sendServerMessage(body);
                             break;
                         case "kp":
-                            outputstr = "Kicked player: "+body;
-                            DataOutputStream outstream = new DataOutputStream(users.get(body.trim()).getOutputStream());
-                            outstream.writeUTF("[~Server~] \n\t" + "You have been kicked!" + "\n[~Server~]");
-                            users.remove(body.trim());
+                            kickPlayer(body.trim());
                             break;
                         case "pl":
                             for(String $: users.keySet())
@@ -144,21 +189,29 @@ public class Server {
                             }
                             break;
                         case "wtp":
-                            DataOutputStream outstream2 = new DataOutputStream(users.get(components[1]).getOutputStream());
-                            outstream2.writeUTF("[~ServerWhisper~] \n\t" + body.replace(components[1], "") + "\n[~ServerWhisper~]");
+                            whisper(components[1], body.replace(components[1], ""));
+                            break;
+                        case "shutdown":
+                            sendServerMessage("Server shutting down...");
+                            TimeUnit.SECONDS.sleep(1);
+                            sendServerMessage("3");
+                            TimeUnit.SECONDS.sleep(1);
+                            sendServerMessage("2");
+                            TimeUnit.SECONDS.sleep(1);
+                            sendServerMessage("1");
+                            System.exit(0);
+                            break;
+                        case "restart":
+                            sendServerMessage("Server is restarting...");
+                            for(String $: users.keySet())
+                            {
+                                kickPlayer($);
+                            }
+                            messages.clear();
                             break;
                         default:
                             System.out.println("Unknown command.");
                             break;
-                    }
-                    if (!outputstr.equals(""))
-                    {
-                        for (String $ : users.keySet())
-                        {
-                            messages.add("[~Server~] \n\t" + outputstr + "\n[~Server~]");
-                            DataOutputStream outstream = new DataOutputStream(users.get($).getOutputStream());
-                            outstream.writeUTF("[~Server~] \n\t" + outputstr + "\n[~Server~]");
-                        }
                     }
                 }
                 catch(Exception exception)
