@@ -41,6 +41,7 @@ public class Server {
             in = new DataInputStream(socket.getInputStream());
             out.writeUTF("Hello!\nPlease enter an ingame-name: ");
             String name = in.readUTF()+"_"+id+"";
+            out.writeUTF(name);
             users.put(name, socket);
             System.out.println("Added to list");
             Thread thread = new Thread(new Input(socket, out, in, name));
@@ -92,16 +93,41 @@ public class Server {
                 try {
                     //System.out.println("Waiting for input...");
                     String input = this.in.readUTF();
-                    String name = input.split("~")[0];
-                    String printed = input.split("~")[1];
+                    String[] comps = input.split("~");
+                    String type = comps[0];
+                    String issuer = comps[1];
+                    String body = comps[2];
                     //System.out.println(input);
-                    String printstr = "["+ name + "]: "+printed;
-                    messages.add(printstr);
-                    for (String $ : users.keySet()) {
-                        if( !$.equals(this.name) && !users.get($).equals(null) )
+                    if (type.equals("m"))
+                    {
+                        String printstr = "["+ issuer + "]: "+body;
+                        messages.add(printstr);
+                        for (String $ : users.keySet()) {
+                            if( !$.equals(this.name) && !users.get($).equals(null) )
+                            {
+                                DataOutputStream outstream = new DataOutputStream(users.get($).getOutputStream());
+                                outstream.writeUTF(printstr);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        System.out.println("Is a command.");
+                        Command com  = new Command(issuer, body);
+                        com.parseCommand(2);
+                        System.out.println("Com: "+com);
+                        switch(com.com())
                         {
-                            DataOutputStream outstream = new DataOutputStream(users.get($).getOutputStream());
-                            outstream.writeUTF(printstr);
+                            case "wtp":
+                                if(users.containsKey(com.args(0)))
+                                {
+                                    DataOutputStream outstream = new DataOutputStream(users.get(com.args(0)).getOutputStream());
+                                    String printstr = "*Whisper*["+ com.issuer() + "]: "+com.args(1)+" *Whisper*";
+                                    outstream.writeUTF(printstr);
+                                }
+                                break;
+                            default:
+                                break;
                         }
                     }
                 }

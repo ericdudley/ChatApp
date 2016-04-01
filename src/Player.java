@@ -31,6 +31,7 @@ public class Player {
             System.out.println(input);
             name = sc.nextLine();
             out.writeUTF(name);
+            name = in.readUTF();
             Thread thread = new Thread(new Output(socket, out, in, sc));
             thread.start();
             Thread thread2 = new Thread(new Input(socket, out, in));
@@ -69,9 +70,26 @@ public class Player {
             {
                 //System.out.print("Message: ");
                 output = this.scanner.nextLine();
+                output.replace("~","");
                 //System.out.println("output: "+output);
                 try {
-                    outputMessage(output);
+                    if(output.charAt(0) == '!')
+                    {
+                        output = output.substring(1);
+                        switch(output)
+                        {
+                            case "help":
+                                System.out.println("wtp %name %message - Whispers a message to a player.");
+                                break;
+                            default:
+                                outputCommand(output);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        outputMessage(output);
+                    }
                 }
                 catch(Exception exception)
                 {
@@ -82,7 +100,12 @@ public class Player {
 
         private void outputMessage(String message) throws Exception
         {
-            out.writeUTF(name+"~"+message);
+            out.writeUTF("m~"+name+"~"+message);
+        }
+
+        private void outputCommand(String command) throws Exception
+        {
+            out.writeUTF("c~"+name+"~"+command);
         }
     }
 
