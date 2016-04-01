@@ -1,5 +1,10 @@
+import sun.audio.AudioPlayer;
+import sun.audio.AudioStream;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -54,6 +59,7 @@ public class Server {
                 {
                     DataOutputStream outstream = new DataOutputStream(users.get($).getOutputStream());
                     outstream.writeUTF(welcome_message);
+                    outstream.writeUTF("!playsound");
                 }
             }
             String total_str = "";
@@ -112,18 +118,25 @@ public class Server {
                     }
                     else
                     {
-                        System.out.println("Is a command.");
+                        //System.out.println("Is a command.");
                         Command com  = new Command(issuer, body);
-                        com.parseCommand(2);
-                        System.out.println("Com: "+com);
+                        //System.out.println("Com: "+com);
                         switch(com.com())
                         {
                             case "wtp":
+                                com.parseCommand(2);
                                 if(users.containsKey(com.args(0)))
                                 {
                                     DataOutputStream outstream = new DataOutputStream(users.get(com.args(0)).getOutputStream());
                                     String printstr = "*Whisper*["+ com.issuer() + "]: "+com.args(1)+" *Whisper*";
                                     outstream.writeUTF(printstr);
+                                }
+                                break;
+                            case "pl":
+                                for(String $: users.keySet())
+                                {
+                                    DataOutputStream outstream = new DataOutputStream(users.get(com.issuer()).getOutputStream());
+                                    outstream.writeUTF($);
                                 }
                                 break;
                             default:
@@ -243,7 +256,7 @@ public class Server {
                             }
                             messages.clear();
                             break;
-                        case "commands":
+                        case "help":
                             System.out.println("sm %message - Send server message to all players.\n" +
                                     "kp %name - Kick player from the server.\n" +
                                     "TODO ban %name - Ban a players ip address from the server.\n" +

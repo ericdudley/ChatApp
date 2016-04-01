@@ -1,5 +1,10 @@
+import sun.audio.AudioPlayer;
+import sun.audio.AudioStream;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
@@ -79,7 +84,13 @@ public class Player {
                         switch(output)
                         {
                             case "help":
-                                System.out.println("wtp %name %message - Whispers a message to a player.");
+                                System.out.println("!wtp %name %message - Whispers a message to a player.\n" +
+                                        "!help - Prints list and description of all commands.\n" +
+                                        "!pl - Prints a list of all players connected to server.\n" +
+                                        "!quit - Exits program.");
+                                break;
+                            case "quit":
+                                System.exit(0);
                                 break;
                             default:
                                 outputCommand(output);
@@ -135,12 +146,38 @@ public class Player {
                         System.out.println("Disconnecting...");
                         //System.exit(0);
                     }
+                    else if(input.equals("!playsound"))
+                    {
+                        // open the sound file as a Java input stream
+                        String gongFile = "joined.wav";
+                        InputStream in = new FileInputStream(gongFile);
+
+                        // create an audiostream from the inputstream
+                        AudioStream audioStream = new AudioStream(in);
+
+                        // play the audio clip with the audioplayer class
+                        AudioPlayer.player.start(audioStream);
+                    }
                     //String name = input.split("~")[0];
                     //String printed = input.split("~")[1];
                     System.out.println(input);
                 }
                 catch(Exception exception)
                 {
+                    try {
+                        String gongFile = "left.wav";
+                        InputStream in = new FileInputStream(gongFile);
+
+                        // create an audiostream from the inputstream
+                        AudioStream audioStream = new AudioStream(in);
+
+                        // play the audio clip with the audioplayer class
+                        AudioPlayer.player.start(audioStream);
+                    }
+                    catch(Exception exception2)
+                    {
+                        //Nothing
+                    }
                     System.out.println("Disconnected from server.");
                     break;
                 }
