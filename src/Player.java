@@ -44,6 +44,7 @@ public class Player {
 
             Sounds.addSound("fx","joined","joined.wav");
             Sounds.addSound("fx","left","left.wav");
+            Sounds.playFx("joined");
         }
         catch(java.net.ConnectException exception)
         {
@@ -93,6 +94,7 @@ public class Player {
                                         "!quit - Exits program.");
                                 break;
                             case "quit":
+                                Sounds.playFx("left");
                                 System.exit(0);
                                 break;
                             default:
