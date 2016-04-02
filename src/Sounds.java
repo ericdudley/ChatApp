@@ -26,7 +26,7 @@ public class Sounds{
 
     public static void playFx(String name)
     {
-        System.out.println("play "+name);
+        //System.out.println("play "+name);
         new Thread(fx.get(name)).start();
     }
 }

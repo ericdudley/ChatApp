@@ -17,12 +17,14 @@ public class Sound implements Runnable{
     {
         this.filename = filename;
         InputStream in = new FileInputStream(filename);
+        //ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        //InputStream in = classLoader.getResourceAsStream("/"+filename);
         this.stream = new AudioStream(in);
     }
 
     public void run()
     {
-        System.out.println(this.filename);
+        //System.out.println(this.filename);
         AudioPlayer.player.start(this.stream());
     }
     public AudioStream stream(){return this.stream;}
