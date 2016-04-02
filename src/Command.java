@@ -4,6 +4,7 @@ import static java.io.File.separator;
 
 /**
  * Created by ericd on 4/1/2016.
+ * @author Eric Dudley
  */
 public class Command {
     public static String seperator = " ";

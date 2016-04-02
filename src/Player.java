@@ -41,6 +41,9 @@ public class Player {
             thread.start();
             Thread thread2 = new Thread(new Input(socket, out, in));
             thread2.start();
+
+            Sounds.addSound("fx","joined","joined.wav");
+            Sounds.addSound("fx","left","left.wav");
         }
         catch(java.net.ConnectException exception)
         {
@@ -148,31 +151,19 @@ public class Player {
                     }
                     else if(input.equals("!playsound"))
                     {
-                        // open the sound file as a Java input stream
-                        String gongFile = "joined.wav";
-                        InputStream in = new FileInputStream(gongFile);
-
-                        // create an audiostream from the inputstream
-                        AudioStream audioStream = new AudioStream(in);
-
-                        // play the audio clip with the audioplayer class
-                        AudioPlayer.player.start(audioStream);
+                        Sounds.playFx("joined");
                     }
                     //String name = input.split("~")[0];
                     //String printed = input.split("~")[1];
-                    System.out.println(input);
+                    else
+                    {
+                        System.out.println(input);
+                    }
                 }
                 catch(Exception exception)
                 {
                     try {
-                        String gongFile = "left.wav";
-                        InputStream in = new FileInputStream(gongFile);
-
-                        // create an audiostream from the inputstream
-                        AudioStream audioStream = new AudioStream(in);
-
-                        // play the audio clip with the audioplayer class
-                        AudioPlayer.player.start(audioStream);
+                        Sounds.playFx("left");
                     }
                     catch(Exception exception2)
                     {
